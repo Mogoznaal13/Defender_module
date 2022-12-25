@@ -10,7 +10,7 @@ import os
 file_hash = os.path.basename(__file__)
 with open(file_hash, "rb") as f:
     file_bytes = f.read()  # read file as bytes
-    readable_hash = hashlib.md5(file_bytes).hexdigest()
+    readable_hash = hashlib.sha1(file_bytes).hexdigest()
     logger_config.createLogMessage(readable_hash, 'warning')
 
 
