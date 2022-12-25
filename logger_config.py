@@ -1,7 +1,7 @@
 import logging
 
 
-logging.basicConfig(level=logging.WARNING, filename='logs/py_log.log', filemode='a',
+logging.basicConfig(level=logging.INFO, filename='logs/py_log.log', filemode='a',
                     format='%(asctime)s - %(levelname)s - %(message)s',  datefmt='%H:%M:%S')
 
 
