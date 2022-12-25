@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+            crossorigin="anonymous"></script>
+
+    <!-- Bootstrap icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css">
+
+    <!-- My css -->
+    <link rel="stylesheet" href="../css/styles.css">
+
+    <!-- EEL JS   -->
+    <script type="text/javascript" src="/eel.js"></script>
+
+    <title>Users</title>
+</head>
+<body>
+<header class="header">
+    <nav class="navbar navbar-expand bg-dark">
+        <div class="container">
+            <div class="collapse navbar-collapse">
+                <ul class="nav justify-content-center">
+                    <li class="nav-item">
+                        <a href="cryptPage.html" class="nav-link text-info" id="cryptSection">Шифрование файлов</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="logsPage.html" class="nav-link text-info" id="logSection">Журнал событий</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="usersPage.html" class="nav-link text-info" id="usersManageSection">Управление учетными
+                            записями</a>
+                    </li>
+                </ul>
+            </div>
+            <button class="btn btn-danger" id="logoutBtn">Выход</button>
+        </div>
+    </nav>
+</header>
+
+    <section class="form-register">
+        <div class="container d-flex flex-column align-items-center p-2">
+            <form class="mb-3 mt-3 p-3 bg-dark border rounded shadow w-50 d-flex flex-column" id="registerUsersForm">
+                <div class="row g-3 mb-4">
+                    <legend class="text-info text-center text-uppercase">Добавление пользователя</legend>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-5 input-group">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="name" id="userName" placeholder="username" aria-describedy="userHelp">
+                            <label for="userName">Имя пользователя</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-5 input-group">
+                        <select class="form-select form-select-lg mb-3" name="role" id="userRole" aria-label=".form-select-lg example">
+                            <option selected>Роль пользователя</option>
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row g-3 mb-3 text-center text-info">
+                    <label for="userName" class="form-label">Вставьте USB-ключ</label>
+                </div>
+                <div class="row g-3">
+                    <div class="d-grid gap-2 col-5 mx-auto">
+                        <button type="submit" class="btn btn-info" id="addUser">Создать</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section class="users d-flex flex-column align-items-center">
+        <div class="container m-4 p-2 bg-dark rounded border">
+            <legend class="text-info mb-3 text-center text-uppercase">Управление учетными записями</legend>
+            <table class="table table-info">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Role</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </section>
+    <script>
+        let table = document.querySelector('table');
+        const formRegister = document.querySelector('#registerUsersForm');
+
+        async function renderUsers() {
+            const users = await eel.getUsers()();
+
+            const userFragment = document.createDocumentFragment();
+            let usersTableBody = document.querySelector('tbody');
+
+            for (let user of users) {
+                let tr = document.createElement('tr');
+                tr.setAttribute('id', `user_id-${user.id}`);
+
+                let thId = document.createElement('th');
+                thId.setAttribute('scope', 'row');
+                thId.textContent = user.id;
+
+                let tdName = document.createElement('td');
+                tdName.textContent = user.name;
+
+                let tdRole = document.createElement('td');
+                tdRole.textContent = user.role;
+
+                let tdBtn = document.createElement('td');
+                let deleteUserBtn = document.createElement('button');
+                deleteUserBtn.textContent = 'Удалить';
+                deleteUserBtn.classList.add('btn', 'btn-danger');
+                deleteUserBtn.setAttribute('user-id', `${user.id}`);
+                tdBtn.appendChild(deleteUserBtn);
+
+                tr.appendChild(thId);
+                tr.appendChild(tdName);
+                tr.appendChild(tdRole);
+                tr.appendChild(tdBtn);
+
+                userFragment.appendChild(tr);
+            }
+            usersTableBody.appendChild(userFragment);
+        }
+
+        async function deleteUser(userId) {
+            return await eel.delUser(userId)();
+        }
+
+        async function createUser() {
+            const formData = new FormData(formRegister);
+
+            let newUsername = formData.get('name');
+            let newRole = formData.get('role');
+            let newKey = await eel.getKey()();
+
+            if (newUsername === '') {
+                alert('Поле "Имя" не должно быть пустым!');
+                return
+            }
+
+            if (newRole === 'Роль пользователя') {
+                newRole = '';
+                alert('Поле "Роль" не должно быть пустым!');
+                return
+            }
+
+            const newUser = {
+                name: newUsername,
+                role: newRole,
+                serial_number: newKey
+            };
+
+            return await eel.createUsr(newUser)();
+        }
+
+        table.addEventListener('click', async (e) => {
+           let target = e.target;
+
+           if (target.tagName !== 'BUTTON') return;
+           else {
+               let userId = Number(target.getAttribute('user-id'));
+               let user = await eel.getUser(userId)();
+               await deleteUser(userId);
+               console.log(user);
+               eel.logWrite(`${JSON.parse(sessionStorage.getItem('user')).name} успешно удалил ${user.name}!`, 'warning');
+           }
+            location.reload();
+        });
+
+        formRegister.addEventListener('submit', async (e) => {
+            await createUser();
+            await renderUsers();
+        });
+
+        renderUsers();
+    </script>
+    <script src="../interface/session.js"></script>
+    <script src="../interface/header.js"></script>
+</body>
+</html>

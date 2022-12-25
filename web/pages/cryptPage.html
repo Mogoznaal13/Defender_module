@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+            crossorigin="anonymous"></script>
+
+    <!-- Bootstrap icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css">
+
+    <!-- My css -->
+    <link rel="stylesheet" href="../css/styles.css">
+
+    <!-- EEL JS   -->
+    <script type="text/javascript" src="/eel.js"></script>
+
+    <title>Crypt</title>
+</head>
+<body>
+<header class="header">
+    <nav class="navbar navbar-expand bg-dark">
+        <div class="container">
+            <div class="collapse navbar-collapse">
+                <ul class="nav justify-content-center">
+                    <li class="nav-item">
+                        <a href="cryptPage.html" class="nav-link text-info" id="cryptSection">Шифрование файлов</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="logsPage.html" class="nav-link text-info" id="logSection">Журнал событий</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="usersPage.html" class="nav-link text-info" id="usersManageSection">Управление учетными
+                            записями</a>
+                    </li>
+                </ul>
+            </div>
+            <button class="btn btn-danger" id="logoutBtn">Выход</button>
+        </div>
+    </nav>
+</header>
+
+<section class="form-crypt">
+    <div class="container d-flex flex-column align-items-center p-2">
+        <form class="mb-3 mt-3 p-3 bg-dark border rounded shadow w-50 d-flex flex-column" id="cryptFilesForm">
+            <div class="row g-3 mb-4">
+                <legend class="text-info text-center text-uppercase">Шифрование</legend>
+            </div>
+            <div class="row g-3 mb-3 text-center text-info">
+                <label class="form-label" id="keyExistInfo"></label>
+            </div>
+            <div class="row g-3 mb-3 text-center text-info">
+                <div class="d-flex justify-content-around mx-auto flex-wrap">
+                    <button type="button" class="btn btn-info" id="keyGenBtn">Сгенерировать</button>
+                </div>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-5 input-group">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="filepath" name="file" placeholder="filename" aria-describedy="userHelp">
+                        <label for="filepath">Введите полный путь к файлу для шифрования/расшифровки</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="d-flex justify-content-around mx-auto flex-wrap">
+                    <button type="button" class="btn btn-info" id="encryptBtn">Шифровать <i class="bi bi-lock-fill"></i></button>
+                    <button type="button" class="btn btn-outline-info" id="decryptBtn">Расшифровать <i class="bi bi-unlock-fill"></i></button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+    let formCrypt = document.querySelector('#cryptFilesForm');
+    let encryptBtn = document.querySelector('#encryptBtn');
+    let decryptBtn = document.querySelector('#decryptBtn');
+    let keyGenBtn = document.querySelector('#keyGenBtn');
+
+    async function renderKeyBtn() {
+        let keyExistStatus = await eel.existKey()();
+        const labelKeyExistStatus = document.querySelector('#keyExistInfo');
+
+
+        if (!keyExistStatus) {
+            labelKeyExistStatus.textContent = "Необходимо сгенерировать ключ!";
+            encryptBtn.setAttribute('disabled', true);
+            decryptBtn.setAttribute('disabled', true);
+        } else {
+            labelKeyExistStatus.textContent = "Ключ сгенерирован!";
+            keyGenBtn.classList.add('visually-hidden');
+        }
+    }
+
+    renderKeyBtn();
+
+    keyGenBtn.addEventListener('click', async () => {
+        await eel.generateKey();
+        location.reload();
+    });
+
+    encryptBtn.addEventListener('click', async () => {
+        const formData = new FormData(formCrypt);
+        let file = formData.get('file');
+
+        await eel.encryptFile(file);
+    })
+
+    decryptBtn.addEventListener('click', async () => {
+       const formData = new FormData(formCrypt);
+        let file = formData.get('file');
+
+        await eel.decryptFile(file);
+    });
+
+</script>
+<script src="../interface/session.js"></script>
+<script src="../interface/header.js"></script>
+</body>
+</html>

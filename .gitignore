@@ -1,0 +1,7 @@
+.idea/
+__pycache__/
+venv/
+handler/coursework.db
+Tools/
+logs/
+coursework.iml
